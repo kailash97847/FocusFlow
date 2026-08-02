@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Syntax / lint check
+        run: node scripts/check.js
+
+      - name: Unit tests (core + services)
+        run: node --test tests/
+
+      - name: Release gate (manifest, SW precache, assets, imports)
+        run: node scripts/validate.js
+
+      - name: Build production image
+        run: docker build -t focusflow:ci .

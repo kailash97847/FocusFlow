@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>FocusFlow — Deep work, distilled</title>
+  <meta name="description" content="Free, private, offline Pomodoro timer with task-linked focus sessions, streak analytics and ambient sound. No account, no ads.">
+  <meta name="theme-color" content="#0b0e1a">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="./assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FocusFlow">
+
+  <link rel="stylesheet" href="./css/styles.css">
+  <script>
+    // Anti-FOUC: apply persisted theme before first paint.
+    try {
+      var s = JSON.parse(localStorage.getItem('focusflow.v1') || '{}').settings;
+      if (s && (s.theme === 'light' || s.theme === 'dark')) {
+        document.documentElement.dataset.theme = s.theme;
+      } else { document.documentElement.removeAttribute('data-theme'); }
+    } catch (e) { /* defaults to dark via attribute */ }
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="./assets/icon-192.png" alt="FocusFlow logo" width="30" height="30">
+      <span class="name">Focus<b>Flow</b></span>
+    </div>
+    <nav class="main-nav" role="tablist" aria-label="Sections">
+      <button role="tab" data-nav="timer" class="is-active" aria-selected="true">Timer</button>
+      <button role="tab" data-nav="tasks" aria-selected="false">Tasks</button>
+      <button role="tab" data-nav="stats" aria-selected="false">Stats</button>
+      <button role="tab" data-nav="settings" aria-selected="false">Settings</button>
+    </nav>
+    <button id="btn-install" hidden>Install app</button>
+  </header>
+
+  <main class="container">
+    <!-- ============ TIMER ============ -->
+    <section class="view" data-view="timer" aria-label="Timer">
+      <div class="timer-card" id="timer-card" data-mode="focus" data-status="idle">
+        <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+          <button role="tab" data-mode-tab="focus" class="is-active" aria-selected="true">Focus</button>
+          <button role="tab" data-mode-tab="shortBreak" aria-selected="false">Short break</button>
+          <button role="tab" data-mode-tab="longBreak" aria-selected="false">Long break</button>
+        </div>
+
+        <div class="ring-wrap">
+          <svg viewBox="0 0 260 260" aria-hidden="true">
+            <defs>
+              <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#8b5cf6"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="130" cy="130" r="118"/>
+            <circle class="ring-fg" id="ring-fg" cx="130" cy="130" r="118"/>
+          </svg>
+          <div class="ring-center">
+            <div class="clock" id="clock" role="timer" aria-live="off" aria-label="Time remaining">25:00</div>
+            <div class="phase-label" id="phase-label">Focus</div>
+            <div class="cycle-dots" id="cycle-dots" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <p class="active-task" id="active-task-name">No active task — add one in Tasks</p>
+
+        <div class="timer-controls">
+          <button class="btn btn-ghost" id="btn-reset" type="button">Reset</button>
+          <button class="btn btn-primary" id="btn-start-pause" type="button" aria-pressed="false">Start</button>
+          <button class="btn btn-ghost" id="btn-skip" type="button">Skip</button>
+        </div>
+
+        <p class="shortcut-hint">
+          <kbd>Space</kbd> start / pause &nbsp;·&nbsp; <kbd>R</kbd> reset &nbsp;·&nbsp; <kbd>S</kbd> skip
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ TASKS ============ -->
+    <section class="view" data-view="tasks" aria-label="Tasks" hidden>
+      <div class="panel">
+        <h2>Task queue</h2>
+        <form class="task-form" id="task-form">
+          <input class="field" id="task-title" type="text" maxlength="200" placeholder="What are you focusing on?" aria-label="Task title" required>
+          <input class="field" id="task-est" type="number" min="1" max="20" value="1" aria-label="Estimated pomodoros">
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <p class="muted" id="tasks-empty" hidden>No tasks yet — add your first focus target above.</p>
+        <ul class="task-list" id="task-list"></ul>
+        <div class="list-footer">
+          <button class="icon-btn" id="btn-clear-completed" type="button" title="Clear completed">Clear completed</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="view" data-view="stats" aria-label="Statistics" hidden>
+      <div class="panel">
+        <h2>Your momentum</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><span class="stat-num" id="stat-today">0m</span><span class="stat-lab">Focused today</span></div>
+          <div class="stat-card"><span class="stat-num" id="stat-streak">0d</span><span class="stat-lab">Streak 🔥</span></div>
+          <div class="stat-card"><span class="stat-num" id="stat-sessions">0</span><span class="stat-lab">Sessions today</span></div>
+          <div class="stat-card"><span class="stat-num" id="stat-total">0h</span><span class="stat-lab">All-time</span></div>
+        </div>
+        <h3>Last 14 days</h3>
+        <div class="chart" id="chart" role="img" aria-label="Focus minutes per day, last 14 days"></div>
+      </div>
+      <div class="panel">
+        <h3>Recent sessions</h3>
+        <ul class="recent-list" id="recent-sessions"></ul>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="view" data-view="settings" aria-label="Settings" hidden>
+      <div class="settings-grid">
+        <div class="panel">
+          <h2>Timer</h2>
+          <div class="setting-row">
+            <label for="set-focus">Focus length <span class="hint">minutes per session</span></label>
+            <input class="field" id="set-focus" type="number" min="1" max="180">
+          </div>
+          <div class="setting-row">
+            <label for="set-short">Short break</label>
+            <input class="field" id="set-short" type="number" min="1" max="60">
+          </div>
+          <div class="setting-row">
+            <label for="set-long">Long break</label>
+            <input class="field" id="set-long" type="number" min="1" max="90">
+          </div>
+          <div class="setting-row">
+            <label for="set-every">Long break every <span class="hint">completed focus sessions</span></label>
+            <input class="field" id="set-every" type="number" min="2" max="12">
+          </div>
+          <div class="setting-row">
+            <label for="set-autobreak">Auto-start breaks</label>
+            <span class="switch"><input id="set-autobreak" type="checkbox"><span class="track"></span></span>
+          </div>
+          <div class="setting-row">
+            <label for="set-autofocus">Auto-start next focus</label>
+            <span class="switch"><input id="set-autofocus" type="checkbox"><span class="track"></span></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Sound &amp; appearance</h2>
+          <div class="setting-row">
+            <label for="set-sound">Sound <span class="hint">chimes at phase end</span></label>
+            <span class="switch"><input id="set-sound" type="checkbox"><span class="track"></span></span>
+          </div>
+          <div class="setting-row">
+            <label for="set-ambient">Ambient noise <span class="hint">generated on-device</span></label>
+            <select class="field" id="set-ambient">
+              <option value="off">Off</option>
+              <option value="brown">Brown noise</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <label for="set-ambientvol">Ambient volume</label>
+            <input class="field" id="set-ambientvol" type="range" min="0" max="1" step="0.05">
+          </div>
+          <div class="setting-row">
+            <label for="set-theme">Theme</label>
+            <select class="field" id="set-theme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="auto">Auto (system)</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="btn-test-sound" type="button">Test chime</button>
+            <button class="btn btn-ghost" id="btn-enable-notifications" type="button">Enable notifications</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Your data</h2>
+          <p class="muted">Everything is stored only in this browser. Export a backup to move devices or keep a snapshot.</p>
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="btn-export" type="button">Export backup</button>
+            <button class="btn btn-ghost" id="btn-import" type="button">Import backup</button>
+            <input id="import-file" type="file" accept="application/json,.json" hidden>
+            <button class="btn-danger" id="btn-reset-all" type="button">Erase all data</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>About</h2>
+          <p class="muted">FocusFlow v1.0 — local-first deep work companion. Free, no ads, no tracking, no cloud. Your attention stays yours.</p>
+          <p class="muted"><a href="../landing/index.html">About &amp; landing page →</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>FocusFlow — deep work, distilled. 100% local-first · no accounts · no tracking.</p>
+  </footer>
+
+  <div class="sr-only" id="sr-announcer" aria-live="polite"></div>
+  <script type="module" src="./js/ui/app.js"></script>
+</body>
+</html>

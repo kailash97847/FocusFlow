@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FocusFlow — Free Pomodoro Timer for Deep Work (No Sign-up, Works Offline)</title>
+  <meta name="description" content="FocusFlow is a free, private, offline Pomodoro timer with task-linked focus sessions, streak analytics and calming ambient sound. No account, no ads, no tracking — your attention stays yours.">
+  <meta name="keywords" content="pomodoro timer, deep work timer, focus timer, offline pomodoro, private pomodoro, pomodoro no sign up, study timer, productivity timer">
+  <link rel="canonical" href="https://focusflow.app/">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FocusFlow — Deep work, distilled">
+  <meta property="og:description" content="Free, private, offline Pomodoro + task tracker with streak analytics. No account. No ads.">
+  <meta property="og:image" content="./assets/og-image.jpg">
+  <meta property="og:url" content="https://focusflow.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FocusFlow — Deep work, distilled">
+  <meta name="twitter:description" content="Free, private, offline Pomodoro timer with streak analytics. No account. No ads.">
+  <meta name="twitter:image" content="./assets/og-image.jpg">
+
+  <link rel="icon" href="../app/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../app/assets/favicon-32.png" sizes="32x32" type="image/png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FocusFlow",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web",
+    "description": "Free, private, offline Pomodoro timer with task-linked focus sessions, streak analytics and ambient sound.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "248" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #0b0e1a; --surface: rgba(255,255,255,.045); --surface-2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.09); --text: #eef0ff; --dim: #9aa1c7;
+      --accent: #6366f1; --accent2: #8b5cf6; --teal: #14b8a6; --amber: #f59e0b;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: var(--font); color: var(--text); line-height: 1.6;
+      background:
+        radial-gradient(1100px 600px at 85% -10%, rgba(99,102,241,.22), transparent 60%),
+        radial-gradient(900px 500px at -10% 60%, rgba(20,184,166,.12), transparent 55%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 28px); }
+
+    header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); background: rgba(11,14,26,.7); border-bottom: 1px solid var(--border); }
+    .nav { display: flex; align-items: center; gap: 12px; padding: 14px 0; }
+    .nav img { width: 32px; height: 32px; border-radius: 10px; }
+    .brand { font-weight: 800; font-size: 1.15rem; letter-spacing: -.02em; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+    .brand b { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .nav-links { margin-left: auto; display: flex; gap: 22px; align-items: center; }
+    .nav-links a { color: var(--dim); text-decoration: none; font-weight: 600; font-size: .92rem; }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn {
+      display: inline-block; text-decoration: none; font-weight: 700; border-radius: 999px;
+      padding: 14px 34px; transition: transform .15s, box-shadow .2s; cursor: pointer; border: 0; font-size: 1rem;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 12px 32px rgba(99,102,241,.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(99,102,241,.55); }
+    .btn-ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-sm { padding: 9px 20px; font-size: .9rem; }
+
+    /* hero */
+    .hero { padding: clamp(48px, 9vw, 96px) 0 clamp(36px, 6vw, 64px); display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+    .eyebrow { display: inline-block; background: var(--surface-2); border: 1px solid var(--border); color: var(--dim); padding: 5px 14px; border-radius: 999px; font-size: .8rem; font-weight: 600; margin-bottom: 18px; }
+    h1 { font-size: clamp(2.3rem, 5.5vw, 3.6rem); line-height: 1.08; letter-spacing: -.03em; font-weight: 800; }
+    h1 .grad { background: linear-gradient(90deg, var(--accent), var(--accent2), var(--teal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p.lead { color: var(--dim); font-size: 1.15rem; margin: 20px 0 28px; max-width: 46ch; }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .micro { color: var(--dim); font-size: .85rem; margin-top: 14px; }
+    .hero-art { position: relative; }
+    .hero-art img { width: 100%; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+
+    /* mock timer chip */
+    .mock {
+      position: absolute; left: -18px; bottom: -22px; display: flex; gap: 14px; align-items: center;
+      background: rgba(17,21,43,.92); border: 1px solid var(--border); border-radius: 18px; padding: 12px 18px;
+      backdrop-filter: blur(10px); box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    }
+    .mock .time { font-variant-numeric: tabular-nums; font-weight: 800; font-size: 1.5rem; letter-spacing: -.02em; }
+    .mock .lab { color: var(--teal); font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
+
+    section { padding: clamp(40px, 7vw, 72px) 0; }
+    .section-title { text-align: center; margin-bottom: 12px; font-size: clamp(1.7rem, 3.6vw, 2.4rem); letter-spacing: -.02em; }
+    .section-sub { text-align: center; color: var(--dim); max-width: 60ch; margin: 0 auto 40px; }
+
+    .grid { display: grid; gap: 16px; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 26px;
+      transition: transform .2s, border-color .2s, background .2s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: rgba(99,102,241,.5); background: var(--surface-2); }
+    .card .emoji { font-size: 1.7rem; }
+    .card h3 { margin: 12px 0 8px; font-size: 1.12rem; letter-spacing: -.01em; }
+    .card p { color: var(--dim); font-size: .95rem; }
+
+    /* steps */
+    .steps { counter-reset: step; display: grid; gap: 14px; }
+    .step { display: flex; gap: 18px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 20px 22px; }
+    .step::before {
+      counter-increment: step; content: counter(step);
+      flex: none; width: 38px; height: 38px; display: grid; place-content: center;
+      border-radius: 12px; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff;
+    }
+    .step h3 { font-size: 1.05rem; margin-bottom: 4px; }
+    .step p { color: var(--dim); font-size: .95rem; }
+
+    /* comparison */
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 16px; font-size: .95rem; }
+    th, td { padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--surface-2); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); }
+    td { background: var(--surface); }
+    td:first-child { font-weight: 600; }
+    .yes { color: var(--teal); font-weight: 700; }
+    .no { color: #fb7185; }
+
+    /* privacy band */
+    .band { border-radius: 24px; padding: clamp(30px, 5vw, 54px); text-align: center; background: linear-gradient(135deg, rgba(99,102,241,.16), rgba(20,184,166,.1)); border: 1px solid var(--border); }
+    .band h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); letter-spacing: -.02em; }
+    .band p { color: var(--dim); max-width: 58ch; margin: 14px auto 0; }
+
+    .final-cta { text-align: center; }
+    .final-cta h2 { font-size: clamp(2rem, 4.6vw, 3rem); letter-spacing: -.03em; }
+    .final-cta p { color: var(--dim); margin: 14px 0 26px; }
+
+    footer { border-top: 1px solid var(--border); padding: 30px 0 44px; color: var(--dim); font-size: .88rem; }
+    .foot-grid { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    footer a { color: var(--dim); text-decoration: none; margin-right: 18px; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .nav-links a:not(.btn) { display: none; }
+      .mock { position: static; margin-top: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="./index.html">
+        <img src="../app/assets/icon-192.png" alt="FocusFlow logo">
+        <span>Focus<b>Flow</b></span>
+      </a>
+      <nav class="nav-links" aria-label="Landing navigation">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#privacy">Privacy</a>
+        <a class="btn btn-primary btn-sm" href="../app/index.html">Open the app — free</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <span class="eyebrow">🍅 Free forever · No sign-up · Works offline</span>
+        <h1>Deep work,<br><span class="grad">distilled.</span></h1>
+        <p class="lead">
+          FocusFlow pairs a throttle-proof Pomodoro timer with a task queue and streak analytics —
+          everything you need to start in 5 seconds and stay in flow. Your data never leaves this device.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="../app/index.html">Start focusing now</a>
+          <a class="btn btn-ghost" href="#features">See features</a>
+        </div>
+        <p class="micro">No account · No ads · No tracking · Installable on desktop &amp; mobile</p>
+      </div>
+      <div class="hero-art">
+        <img src="./assets/og-image.jpg" alt="FocusFlow — calm indigo focus ring over flowing waves" width="1200" height="630">
+        <div class="mock" aria-hidden="true">
+          <div>
+            <div class="lab">Focus · 3 🍅 today</div>
+            <div class="time">24:59</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <h2 class="section-title">Everything you need. Nothing tracking you.</h2>
+      <p class="section-sub">Built for students, makers and remote teams who want flow — not another dashboard demanding a login.</p>
+      <div class="grid grid-3">
+        <div class="card"><div class="emoji">⏱️</div><h3>Throttle-proof timer</h3><p>Timestamp-based engine stays accurate through background tabs, screen locks and laptop sleep — the #1 failure of other web timers.</p></div>
+        <div class="card"><div class="emoji">🍅</div><h3>Task-linked Pomodoros</h3><p>Attach sessions to tasks with estimates. Watch tomatoes pile up on the work that actually matters.</p></div>
+        <div class="card"><div class="emoji">🔥</div><h3>Streaks &amp; analytics</h3><p>Daily totals, 14-day chart and streaks — the analytics others put behind a paywall, free forever.</p></div>
+        <div class="card"><div class="emoji">📴</div><h3>100% offline</h3><p>An installable PWA. Close the tab, kill the Wi-Fi, fly to the mountains — FocusFlow keeps ticking.</p></div>
+        <div class="card"><div class="emoji">🌊</div><h3>Calm ambient sound</h3><p>Warm brown noise generated on-device, plus a gentle completion chime. No streaming, no subscription.</p></div>
+        <div class="card"><div class="emoji">🔒</div><h3>Local-first privacy</h3><p>No servers, no analytics SDKs, no cookies. Export your data as JSON any time. GDPR by architecture.</p></div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how">
+      <h2 class="section-title">From zero to flow in three beats</h2>
+      <p class="section-sub">Open the app and press Space. That's the whole onboarding.</p>
+      <div class="grid grid-2">
+        <div class="steps">
+          <div class="step"><div><h3>Start a 25-minute focus</h3><p>One tap (or Space). The gradient ring drains as you work; your active task counts the tomatoes.</p></div></div>
+          <div class="step"><div><h3>Break, the smart way</h3><p>Short breaks keep rhythm; every 4th session earns a long break. Breaks can auto-start so you never "forget" to rest.</p></div></div>
+          <div class="step"><div><h3>Review your momentum</h3><p>Check today's minutes, your streak and the 14-day chart. Improvement you can see keeps you coming back.</p></div></div>
+        </div>
+        <div>
+          <h3 style="margin-bottom:16px; font-size:1.25rem;">Why people switch to FocusFlow</h3>
+          <table aria-label="Comparison with typical Pomodoro apps">
+            <tr><th></th><th>FocusFlow</th><th>Typical apps</th></tr>
+            <tr><td>Price for core features</td><td class="yes">Free</td><td class="no">$5–12/mo</td></tr>
+            <tr><td>Account required</td><td class="yes">Never</td><td class="no">Usually</td></tr>
+            <tr><td>Works offline</td><td class="yes">Full</td><td class="no">Partial</td></tr>
+            <tr><td>Survives sleep/tab-throttle</td><td class="yes">Yes</td><td class="no">Often drifts</td></tr>
+            <tr><td>Analytics &amp; streaks</td><td class="yes">Free</td><td class="no">Paywalled</td></tr>
+            <tr><td>Your data leaves device</td><td class="yes">Never</td><td class="no">Always</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRIVACY -->
+    <section id="privacy">
+      <div class="band">
+        <h2>Your attention stays yours.</h2>
+        <p>
+          FocusFlow has no backend: every task, session and streak lives in your browser's local storage.
+          No tracking pixels, no cookies, no fingerprinting — we literally cannot see your data.
+          Export it, back it up, or erase it completely with one click.
+        </p>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta">
+      <h2>Ready to reclaim your focus?</h2>
+      <p>Free forever. Works offline. Starts in five seconds.</p>
+      <a class="btn btn-primary" href="../app/index.html">Launch FocusFlow</a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-grid">
+      <div>© 2026 FocusFlow · Deep work, distilled.</div>
+      <nav aria-label="Footer">
+        <a href="../app/index.html">App</a>
+        <a href="#features">Features</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

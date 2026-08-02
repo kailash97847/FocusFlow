@@ -1,0 +1,9 @@
+services:
+  focusflow:
+    build: .
+    image: focusflow:1.0.0
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    # Serve over HTTPS in production (PWA install requires a secure context):
+    # put behind a TLS-terminating reverse proxy (e.g. Caddy, Traefik, nginx).
