@@ -74,15 +74,14 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
+          # NOTE: android-emulator-runner executes this script LINE BY LINE
+          # (each line its own shell) — no multi-line control flow, no
+          # cross-line variables. Keep every check on a single line.
           script: |
             adb wait-for-device
             adb shell input keyevent 82
             adb install app-debug.apk
             adb shell monkey -p com.focusflow.app -c android.intent.category.LAUNCHER 1
-            sleep 15
-            PID=$(adb shell pidof com.focusflow.app | tr -d '[:space:]')
-            if [ -z "$PID" ]; then
-              echo "LAUNCH FAILED: process not running"; adb shell dumpsys activity top | tail -30; exit 1
-            fi
-            echo "LAUNCH OK: com.focusflow.app running with pid $PID"
-            adb shell dumpsys activity processes | grep -m1 "com.focusflow.app" || true
+            sleep 20
+            PID=$(adb shell pidof com.focusflow.app | tr -d '[:space:]') && [ -n "$PID" ] && echo "LAUNCH OK: com.focusflow.app pid=$PID" || { echo "LAUNCH FAILED: process not running"; adb shell dumpsys activity top | tail -30; exit 1; }
+            adb shell dumpsys activity activities | grep -m2 "com.focusflow.app" && echo "ACTIVITY VISIBLE OK"
