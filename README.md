@@ -48,6 +48,20 @@ A single-purpose PWA doesn't need a framework. No build step means ~62 KB of
 auditable JS, sub-second loads, trivial hosting, zero supply-chain risk — and
 tests that run on any Node 18+ runtime in ~300 ms.
 
+## Native Android app (Capacitor)
+
+```bash
+npm ci && npx cap sync android
+cd android && ./gradlew assembleDebug bundleRelease
+```
+
+Artifacts: `android/app/build/outputs/apk/debug/app-debug.apk` and
+`android/app/build/outputs/bundle/release/app-release.aab`.
+The entire web app ships **inside** the binary — fully offline on-device, with
+exact-alarm phase notifications bridged to native LocalNotifications.
+See [android/README.md](android/README.md) for signing, icons, splash and CI
+(emulator launch test runs on every push).
+
 ## DevOps
 
 ```bash

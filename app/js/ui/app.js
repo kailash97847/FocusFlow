@@ -277,6 +277,7 @@ export function initApp(doc) {
   }
 
   function onPhaseEnd({ finishedMode, sessionCompleted, durationMs, nextMode }) {
+    notifier.cancelScheduled();
     if (sessionCompleted) {
       sessions = [...sessions, createSession({ taskId: tasks.getActive()?.id ?? null, minutes: durationMs / 60_000 })];
       const active = tasks.getActive();
@@ -298,9 +299,26 @@ export function initApp(doc) {
 
   // ---------- wiring ----------
   engine.on('tick', renderTimer);
-  engine.on('change', () => { renderTimer(); persist(); });
+  engine.on('change', () => { renderTimer(); persist(); syncScheduledNotification(); });
   engine.on('phaseEnd', onPhaseEnd);
   tasks.onChange(() => { renderTasks(); renderTimer(); persist(); });
+
+  /**
+   * Keep a native scheduled alert aligned with the running timer so the
+   * phase-end ping fires even if the app is backgrounded or killed.
+   */
+  function syncScheduledNotification() {
+    const st = engine.getState();
+    if (st.status === 'running' && Number.isFinite(st.endsAt)) {
+      notifier.schedulePhaseEnd({
+        at: st.endsAt,
+        title: `${MODE_LABELS[st.mode]} complete`,
+        body: st.mode === MODES.FOCUS ? 'Great work — tap to take your break.' : 'Break over — tap to refocus.',
+      });
+    } else {
+      notifier.cancelScheduled();
+    }
+  }
 
   el.startPause.addEventListener('click', () => {
     audio.unlock();
@@ -432,6 +450,8 @@ export function initApp(doc) {
   renderTasks();
   renderStats();
   persist();
+  syncScheduledNotification();
+  notifier.init().finally(renderSettingsForm);
 
   return { engine, tasks, switchView };
 }

@@ -7,3 +7,10 @@ build/
 __pycache__/
 .pytest_cache/
 assets-src/*.tmp
+
+# Android local config & signing
+android/local.properties
+android/keystore.properties
+android/keystore/
+*.jks
+*.keystore

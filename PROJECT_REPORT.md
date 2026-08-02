@@ -129,4 +129,21 @@ docker build -t focusflow . && docker run -p 8080:80 focusflow   # production
 
 ---
 
+## Addendum — v1.0.0 Native Android (Capacitor 6)
+
+- **Shell:** Capacitor 6.2 Android project (`android/`, package `com.focusflow.app`, minSdk 22 / target 34).
+  The whole web app bundles into the binary — **offline functionality intact by construction**.
+- **Config:** adaptive launcher icons (all densities, ring-cutout foreground on navy), branded bitmap +
+  Android 12 SplashScreen, permissions (`POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, + plugin-merged
+  `RECEIVE_BOOT_COMPLETED`/`WAKE_LOCK`), notification channel `focusflow_phases`, release signing via
+  gitignored `keystore.properties` + generated 2048-bit RSA key.
+- **Bridge:** `notify.js` auto-detects Capacitor LocalNotifications — phase-end alerts are *scheduled*
+  when a phase starts, so they fire even if the app is backgrounded/killed. Web PWA behavior unchanged.
+- **Builds (all green):** `app-debug.apk` (6.1 MB), `app-release.apk` (5.3 MB, signed), `app-release.aab`
+  (5.1 MB, signed) — zero build errors, signatures verified with apksigner/jarsigner, manifest + bundled
+  assets verified with aapt.
+- **Launch verification:** GitHub Actions `android.yml` boots an API-34 emulator, installs the APK,
+  monkey-launches `com.focusflow.app` and asserts the process is alive — runs on every push.
+- **Docs:** [android/README.md](android/README.md) (build/signing/verification recipes).
+
 *End of report. All 7 phases complete; every phase verified before marking done.*
